@@ -1,5 +1,5 @@
 \documentclass[12pt]{article}
-\usepackage{amsmath,amssymb,mathrsfs,fancyhdr,syntonly,lastpage,hyperref,enumitem,graphicx,verbatim}
+\usepackage{amsmath,amssymb,mathrsfs,fancyhdr,syntonly,lastpage,hyperref,enumitem,graphicx,verbatim,layout}
 
 \hypersetup{colorlinks=true,urlcolor=black}
 
@@ -12,7 +12,6 @@
 \parindent         0pt   % sets leading space for paragraphs
 \pagestyle{empty}        % Uncomment if don't want page numbers
 \pagestyle{fancyplain}
-
 
 
 \begin{document}
@@ -35,5 +34,31 @@ d
 Please provide posterior summaries of all model parameters, i.e. $\lambda_i$ and the parameters in your prior for the $\lambda_i$, through histograms of posterior samples or something similar.
 
 \end{enumerate}
+
+\textbf{Solution:} \\
+
+For the problem at hand, I want to estimate the posterior distribution of the rate of fatal accidents per miles flown.  The basic structure I will use is as follows: \\
+
+$Y_i\stackrel{ind}{\sim} Po(x_i \lambda_i)$ \\
+$\lambda_i \sim Ga(\alpha,\beta)$ \\
+$\alpha \sim Unif(0,a)$ \\
+$\beta \sim Unif(0,b)$ \\
+
+Where the gamma prior is chosen for convenience and the parameters of the hyperparameter are intended to be noninformative but I will need to check that a and b are sufficiently large so as to not constrain $\alpha$ and $\beta$. \\
+
+This hierarchical model, $p(\lambda|y) \propto p(y|\lambda,\alpha,\beta)p(\lambda|\alpha,\beta)p(\alpha,\beta)$ can be estimated using the rjags package in R:
+
+<<hierarchical model>>=
+airline_fatalities<-"model{
+for (i in 1:length(d)){
+y[i] ~ dpois(mu[i])
+mu[i] <- x[i]*lambda[i]
+lambda[i] ~ dgamma(alpha,beta)
+}
+    alpha ~ dunif(0,a)
+    beta ~ dunif(0,b)
+}
+"
+@
 
 \end{document}
