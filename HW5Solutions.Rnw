@@ -1,5 +1,9 @@
 \documentclass[12pt]{article}
+<<<<<<< HEAD
 \usepackage{amsmath,amssymb,mathrsfs,fancyhdr,syntonly,lastpage,hyperref,enumitem,graphicx,verbatim,layout,rjags}
+=======
+\usepackage{amsmath,amssymb,mathrsfs,fancyhdr,syntonly,lastpage,hyperref,enumitem,graphicx,verbatim,layout}
+>>>>>>> 16ab1f410cb3289c7f18fdca47235ee1ee289880
 
 \hypersetup{colorlinks=true,urlcolor=black}
 
@@ -50,6 +54,7 @@ This hierarchical model, $p(\lambda|y) \propto p(y|\lambda,\alpha,\beta)p(\lambd
 
 <<hierarchical model>>=
 airline_fatalities<-"model{
+<<<<<<< HEAD
     for (i in 1:n){
     y[i] ~ dpois(x[i]*lambda[i]) 
     lambda[i] ~ dgamma(alpha,beta)
@@ -74,6 +79,17 @@ hist(results[[1]][,"beta"], freq=F, xlab="beta", ylab="p(b|y)", main="", xlim=c(
 par(mfrow=c(1,1))
 hist(d$fatal_accidents/d$miles_flown, 100, freq=F, ylim=c(0,1), xlab="Fatal Accident Rate", main="Empirical Fatal Accident Rate vs Posterior mean")
 curve(dgamma(x, alpha, beta), add=T, lwd=2, col="red")
+=======
+for (i in 1:length(d)){
+y[i] ~ dpois(mu[i])
+mu[i] <- x[i]*lambda[i]
+lambda[i] ~ dgamma(alpha,beta)
+}
+    alpha ~ dunif(0,a)
+    beta ~ dunif(0,b)
+}
+"
+>>>>>>> 16ab1f410cb3289c7f18fdca47235ee1ee289880
 @
 
 \end{document}
