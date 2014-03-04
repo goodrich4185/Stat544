@@ -1,5 +1,5 @@
 \documentclass[12pt]{article}
-\usepackage{amsmath,amssymb,mathrsfs,fancyhdr,syntonly,lastpage,hyperref,enumitem,graphicx,verbatim,layout}
+\usepackage{amsmath,amssymb,mathrsfs,fancyhdr,syntonly,lastpage,hyperref,enumitem,graphicx,verbatim,layout,rjags}
 
 \hypersetup{colorlinks=true,urlcolor=black}
 
@@ -50,15 +50,30 @@ This hierarchical model, $p(\lambda|y) \propto p(y|\lambda,\alpha,\beta)p(\lambd
 
 <<hierarchical model>>=
 airline_fatalities<-"model{
-for (i in 1:length(d)){
-y[i] ~ dpois(mu[i])
-mu[i] <- x[i]*lambda[i]
-lambda[i] ~ dgamma(alpha,beta)
+    for (i in 1:n){
+    y[i] ~ dpois(x[i]*lambda[i]) 
+    lambda[i] ~ dgamma(alpha,beta)
 }
     alpha ~ dunif(0,a)
     beta ~ dunif(0,b)
-}
-"
+}"
+
+dat<-list(y=d$fatal_accidents,x=d$miles_flown,n=nrow(d),a=10000,b=1000000)
+
+m<-jags.model(textConnection(airline_fatalities),data=dat)
+results = coda.samples(m, c("alpha","beta"), n.iter=10000)
+alpha = results[[1]][,"alpha"]
+beta = results[[1]][,"beta"]
+
+#checking the restrictiveness of the hyperprior parameters
+par(mfrow=c(1,2))
+hist(results[[1]][,"alpha"], freq=F, xlab="alpha", ylab="p(a|y)", main="", xlim=c(0,dat$a))
+hist(results[[1]][,"beta"], freq=F, xlab="beta", ylab="p(b|y)", main="", xlim=c(0,dat$b))
+
+# Posterior mean prior
+par(mfrow=c(1,1))
+hist(d$fatal_accidents/d$miles_flown, 100, freq=F, ylim=c(0,1), xlab="Fatal Accident Rate", main="Empirical Fatal Accident Rate vs Posterior mean")
+curve(dgamma(x, alpha, beta), add=T, lwd=2, col="red")
 @
 
 \end{document}
